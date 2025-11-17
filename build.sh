@@ -7,5 +7,7 @@ python manage.py collectstatic --no-input
 python manage.py migrate
 
 if [ "$CREATE_SUPERUSER" = "true" ]; then
-    python manage.py createsuperuser --no-input
+    # Createsuperuser with --no-input requires DJANGO_SUPERUSER_USERNAME,
+    # DJANGO_SUPERUSER_EMAIL, and DJANGO_SUPERUSER_PASSWORD env vars
+    python manage.py createsuperuser --no-input || true
 fi
