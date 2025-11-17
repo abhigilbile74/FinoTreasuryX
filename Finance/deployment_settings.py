@@ -1,48 +1,60 @@
-import os 
+import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-from .settings import *
-from .settings import BASE_DIR
+from .settings import BASE_DIR  # ONLY this allowed
 
-RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
+# -----------------------------
+# ALLOWED_HOSTS / CSRF
+# -----------------------------
+RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
 if RENDER_HOSTNAME:
-    ALLOWED_HOSTS = [RENDER_HOSTNAME]
-    CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_HOSTNAME}']
+    ALLOWED_HOSTS.append(RENDER_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_HOSTNAME}"]
 else:
-    ALLOWED_HOSTS = []
     CSRF_TRUSTED_ORIGINS = []
 
 DEBUG = False
-SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
 
+SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-default-secret")
+
+# -----------------------------
+# MIDDLEWARE (clean + correct)
+# -----------------------------
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # add this line
-    'django.middleware.common.CommonMiddleware',
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", 
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",  # Vite
-#     "http://localhost:3000",  # CRA
-# ]
+# -----------------------------
+# Static files (WhiteNoise)
+# -----------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STORAGES = {
-    "default":{
-        "BACKEND":"django.core.files.storage.FileSystemStorage",
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
-    "staticfiles":{
-        "BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage",
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
-
 }
 
+# -----------------------------
+# Database
+# -----------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise ImproperlyConfigured("DATABASE_URL environment variable is required.")
