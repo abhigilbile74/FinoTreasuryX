@@ -1,7 +1,7 @@
 import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-from .settings import BASE_DIR  # ONLY this allowed
+from .settings import *   # ← IMPORT EVERYTHING, NOT ONLY BASE_DIR
 
 # -----------------------------
 # ALLOWED_HOSTS / CSRF
@@ -18,24 +18,7 @@ else:
 
 DEBUG = False
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-default-secret")
-
-# -----------------------------
-# MIDDLEWARE (clean + correct)
-# -----------------------------
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
-
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
 
 # -----------------------------
 # Static files (WhiteNoise)
@@ -46,8 +29,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
-
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -56,7 +37,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
 
 # -----------------------------
 # Database
