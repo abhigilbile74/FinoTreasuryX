@@ -28,6 +28,11 @@ python manage.py collectstatic --no-input
 
 python manage.py migrate
 
+echo "🛠 Running migrations..."
+python manage.py migrate --no-input
+
+echo "👤 Creating default superuser (if enabled)..."
 if [ "$CREATE_SUPERUSER" = "true" ]; then
     python manage.py createsuperuser --no-input || true
 fi
+
