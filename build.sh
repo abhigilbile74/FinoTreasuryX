@@ -15,9 +15,9 @@ if [ "$CREATE_SUPERUSER" = "true" ]; then
     python manage.py createsuperuser --no-input || true
 fi
 
-echo "🚀 Starting Gunicorn..."
+echo "🚀 Starting Gunicorn (NO TIMEOUT)..."
 gunicorn Finance.asgi:application \
     -k uvicorn.workers.UvicornWorker \
     --workers 1 \
     --bind 0.0.0.0:$PORT \
-    --timeout 60
+    --timeout 0
