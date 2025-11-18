@@ -1,8 +1,7 @@
 import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-from .settings import *   # Import base settings
-
+from .settings import *  # Import base settings
 
 # -----------------------------
 # Debug & Secret Key
@@ -10,22 +9,29 @@ from .settings import *   # Import base settings
 DEBUG = False
 
 SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
-
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY environment variable is required.")
 
 # -----------------------------
-# Allowed Hosts / CSRF
+# Allowed Hosts / CSRF / Session
 # -----------------------------
 RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
 if RENDER_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_HOSTNAME)
 
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{RENDER_HOSTNAME}"
-] if RENDER_HOSTNAME else []
+CSRF_TRUSTED_ORIGINS = []
+if RENDER_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOSTNAME}")
+    CSRF_TRUSTED_ORIGINS.append(f"http://{RENDER_HOSTNAME}")
 
+# Ensure secure cookies
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
 
 # -----------------------------
 # CORS (Frontend URL)
@@ -36,11 +42,13 @@ FRONTEND_URL = os.environ.get(
 )
 
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [FRONTEND_URL]
-
+CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,
+    FRONTEND_URL.replace("https://", "http://")
+]
 
 # -----------------------------
-# Static Files (WhiteNoise)
+# Static & Media Files (WhiteNoise)
 # -----------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -65,10 +73,9 @@ MIDDLEWARE = [
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
 
 # -----------------------------
 # Database (PostgreSQL - Render)
@@ -84,7 +91,6 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
-
 
 # -----------------------------
 # Logging
@@ -109,3 +115,10 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+# -----------------------------
+# Optional: Security headers for production
+# -----------------------------
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
