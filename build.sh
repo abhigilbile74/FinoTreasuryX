@@ -2,6 +2,9 @@
 set -o errexit
 set -o pipefail
 
+echo "📦 Installing dependencies..."
+pip install -r requirements.txt
+
 echo "⏳ Waiting for PostgreSQL..."
 until python - <<END
 import os, psycopg2
@@ -9,11 +12,9 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"])
 conn.close()
 END
 do
+  echo "Database not ready, retrying..."
   sleep 3
 done
-
-echo "📦 Installing dependencies..."
-pip install -r requirements.txt
 
 echo "🗂 Collecting static files..."
 python manage.py collectstatic --no-input
