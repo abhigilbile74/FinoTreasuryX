@@ -3,21 +3,18 @@ set -o errexit
 set -o pipefail
 
 echo "📦 Installing dependencies..."
-pip install --no-cache-dir -r requirements.txt
+pip install -r requirements.txt
 
 echo "🗂 Collecting static files..."
-python manage.py collectstatic --no-input
+# Comment this to skip static collection if not needed
+python manage.py collectstatic --no-input --clear
 
 echo "🛠 Applying migrations..."
 python manage.py migrate --no-input
 
-if [ "$CREATE_SUPERUSER" = "true" ]; then
-    python manage.py createsuperuser --no-input || true
-fi
-
-echo "🚀 Starting Gunicorn (NO TIMEOUT)..."
+echo "🚀 Starting Gunicorn (FAST MODE)..."
 gunicorn Finance.asgi:application \
-    -k uvicorn.workers.UvicornWorker \
-    --workers 1 \
-    --bind 0.0.0.0:$PORT \
-    --timeout 0
+  -k uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:$PORT \
+  --workers 1 \
+  --timeout 0
