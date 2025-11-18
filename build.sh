@@ -3,28 +3,21 @@ set -o errexit
 set -o pipefail
 
 echo "📦 Installing dependencies..."
-pip install -r requirements.txt
-
-echo "⏳ Waiting for PostgreSQL..."
-until python - <<END
-import os, psycopg2
-conn = psycopg2.connect(os.environ["DATABASE_URL"])
-conn.close()
-END
-do
-  echo "Database not ready, retrying..."
-  sleep 3
-done
+pip install --no-cache-dir -r requirements.txt
 
 echo "🗂 Collecting static files..."
 python manage.py collectstatic --no-input
 
-echo "🛠 Running migrations..."
-python manage.py migrate
+echo "🛠 Applying migrations..."
+python manage.py migrate --no-input
 
 if [ "$CREATE_SUPERUSER" = "true" ]; then
     python manage.py createsuperuser --no-input || true
 fi
 
-echo "✅ All setup done, starting Gunicorn..."
-gunicorn Finance.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+echo "🚀 Starting Gunicorn..."
+gunicorn Finance.asgi:application \
+    -k uvicorn.workers.UvicornWorker \
+    --workers 1 \
+    --bind 0.0.0.0:$PORT \
+    --timeout 60
