@@ -60,7 +60,30 @@ Investment Avenues: Lists practical options like Equity Mutual Funds, Debt Funds
 
 🌐 Access the Application
 
-Once both the Django backend and the React frontend are running, open your browser and navigate to http://localhost:3000/.
+- Local backend: `http://127.0.0.1:8000`
+- Local frontend (Vite): `http://localhost:5173`
+
+## Deployment (Render)
+
+1. **Provision PostgreSQL** on Render and copy the `DATABASE_URL`.
+2. **Environment variables** for the backend web service:
+   ```
+   DJANGO_SETTINGS_MODULE=Finance.deployment_settings
+   SECRET_KEY=<secure value>
+   DATABASE_URL=<render postgres url>
+   FRONTEND_URL=https://finotreasuryx.onrender.com
+   ALLOWED_HOSTS=finotreasuryx.onrender.com,<backend-service>.onrender.com
+   ```
+   Optional:
+   ```
+   CREATE_SUPERUSER=true
+   DJANGO_SUPERUSER_USERNAME=<admin>
+   DJANGO_SUPERUSER_EMAIL=<email>
+   DJANGO_SUPERUSER_PASSWORD=<password>
+   ```
+3. **Build Command**: `./build.sh`
+4. **Start Command**: `gunicorn Finance.wsgi`
+5. **Static files**: WhiteNoise + `collectstatic` handled via the build script.
 
 📝 Educational Resources
 

@@ -22,12 +22,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-w36x+r75%9*_f#9l&x^xnq@4@vglv)4_a75&5cq<RuPaySymbol showLogo={false} />9-pk)j8(tn"
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-w36x+r75%9*_f#9l&x^xnq@4@vglv)4_a75&5cq9-pk)j8(tn",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = []
+if allowed_hosts := os.environ.get("DJANGO_ALLOWED_HOSTS"):
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(",") if host.strip()]
+else:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -74,10 +80,17 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite
-    "http://localhost:3000",  # CRA
+DEFAULT_FRONTEND_URLS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    os.environ.get("FRONTEND_URL"),
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    url for url in DEFAULT_FRONTEND_URLS if url
+]
+
+CORS_ALLOW_ALL_ORIGINS = os.environ.get("DJANGO_ALLOW_ALL_CORS", "True").lower() == "true"
 
 
 STATIC_URL = "/static/"
@@ -85,10 +98,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-
-
-CORS_ALLOW_ALL_ORIGINS = True  # for development
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -173,21 +182,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-CORS_ALLOW_ALL_ORIGINS = True  # or set allowed origins explicitly
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# settings.py
 LOGOUT_REDIRECT_URL = "/"

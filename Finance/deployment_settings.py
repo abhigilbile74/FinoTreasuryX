@@ -32,7 +32,7 @@ CSRF_TRUSTED_ORIGINS = [
 # -----------------------------
 FRONTEND_URL = os.environ.get(
     "FRONTEND_URL",
-    "https://frontendfinotreasuryx.onrender.com"
+    "https://finotreasuryx.onrender.com"
 )
 
 CORS_ALLOW_ALL_ORIGINS = False
