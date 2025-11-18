@@ -16,22 +16,24 @@ if not SECRET_KEY:
 # Allowed Hosts / CSRF / Session
 # -----------------------------
 RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+BACKEND_DOMAIN = RENDER_HOSTNAME or "localhost"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-if RENDER_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_HOSTNAME)
+if BACKEND_DOMAIN:
+    ALLOWED_HOSTS.append(BACKEND_DOMAIN)
 
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = []
-if RENDER_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOSTNAME}")
-    CSRF_TRUSTED_ORIGINS.append(f"http://{RENDER_HOSTNAME}")
+if BACKEND_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{BACKEND_DOMAIN}")
+    CSRF_TRUSTED_ORIGINS.append(f"http://{BACKEND_DOMAIN}")
 
 # Ensure secure cookies
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True   # Works only on HTTPS
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
-SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+SECURE_SSL_REDIRECT = True     # Redirect HTTP -> HTTPS
 
 # -----------------------------
 # CORS (Frontend URL)
@@ -117,7 +119,7 @@ LOGGING = {
 }
 
 # -----------------------------
-# Optional: Security headers for production
+# Optional: Security headers
 # -----------------------------
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
