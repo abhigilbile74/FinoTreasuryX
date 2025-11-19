@@ -1,57 +1,72 @@
 import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-from .settings import *  # Import base settings
+from .settings import *
 
-# -----------------------------
+# ----------------------------------------
 # Debug & Secret Key
-# -----------------------------
+# ----------------------------------------
 DEBUG = False
 
 SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
 if not SECRET_KEY:
     raise ImproperlyConfigured("SECRET_KEY environment variable is required.")
 
-# -----------------------------
-# Allowed Hosts / CSRF / Session
-# -----------------------------
-RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-BACKEND_DOMAIN = RENDER_HOSTNAME or "localhost"
+# ----------------------------------------
+# Allowed Hosts / Backend Domain
+# ----------------------------------------
+RENDER_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")  # provided by Render
+BACKEND_DOMAIN = RENDER_HOSTNAME or "finotreasuryx-1.onrender.com"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-if BACKEND_DOMAIN:
-    ALLOWED_HOSTS.append(BACKEND_DOMAIN)
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    BACKEND_DOMAIN,
+]
 
+# ----------------------------------------
 # CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = []
-if BACKEND_DOMAIN:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{BACKEND_DOMAIN}")
-    CSRF_TRUSTED_ORIGINS.append(f"http://{BACKEND_DOMAIN}")
+# ----------------------------------------
+CSRF_TRUSTED_ORIGINS = [
+    "https://finotreasuryx-1.onrender.com",
+    "https://frontendfinotreasuryx.onrender.com",
+]
 
-# Ensure secure cookies
-SESSION_COOKIE_SECURE = True   # Works only on HTTPS
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = False
-SECURE_SSL_REDIRECT = True     # Redirect HTTP -> HTTPS
-
-# -----------------------------
-# CORS (Frontend URL)
-# -----------------------------
+# ----------------------------------------
+# CORS Settings
+# ----------------------------------------
 FRONTEND_URL = os.environ.get(
     "FRONTEND_URL",
-    "https://finotreasuryx.onrender.com"
+    "https://frontendfinotreasuryx.onrender.com"
 )
 
 CORS_ALLOW_ALL_ORIGINS = False
+
 CORS_ALLOWED_ORIGINS = [
     FRONTEND_URL,
-    FRONTEND_URL.replace("https://", "http://")
 ]
 
-# -----------------------------
-# Static & Media Files (WhiteNoise)
-# -----------------------------
+# Allow all Render subdomains (optional but helpful)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.onrender\.com$",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "accept",
+    "origin",
+    "user-agent",
+    "accept-encoding",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# ----------------------------------------
+# Static & Media
+# ----------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
@@ -79,9 +94,9 @@ STORAGES = {
     },
 }
 
-# -----------------------------
-# Database (PostgreSQL - Render)
-# -----------------------------
+# ----------------------------------------
+# Database (PostgreSQL)
+# ----------------------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise ImproperlyConfigured("DATABASE_URL environment variable is required.")
@@ -94,33 +109,28 @@ DATABASES = {
     )
 }
 
-# -----------------------------
+# ----------------------------------------
 # Logging
-# -----------------------------
+# ----------------------------------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-    },
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
+        "console": {"class": "logging.StreamHandler"},
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
+    "root": {"handlers": ["console"], "level": "INFO"},
 }
 
-# -----------------------------
-# Optional: Security headers
-# -----------------------------
+# ----------------------------------------
+# Security Settings
+# ----------------------------------------
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # MUST remain False for frontend JS to send CSRF
+
 SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
